@@ -395,3 +395,33 @@ ImpuestoNeto float,
 MontoTotalLinea float/*Cuando no existe exoneracion se obtiene de la sumatoria de los campos "Subtotal+ImpuestoNeto" de lo contrario "Subtotal+ImpuestoNeto"*/
 )
 
+/****** Facturacion Electronica ******/
+
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE dbo.LibroContable
+	(
+	IdAsiento int NOT NULL,
+	Detalle nvarchar(100) NOT NULL,
+	TipoDeMovimiento nvarchar(30) NOT NULL,
+	Monto float(53) NOT NULL,
+	Fecha date NOT NULL,
+	Hora time(7) NOT NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE dbo.LibroContable SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+select Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'ALTER') as ALT_Per, Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'VIEW DEFINITION') as View_def_Per, Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'CONTROL') as Contr_Per
