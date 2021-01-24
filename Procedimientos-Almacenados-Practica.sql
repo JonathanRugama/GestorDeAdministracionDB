@@ -446,3 +446,5 @@ INNER JOIN Archivos ON Archivos.idArchivo = ArchivoPedido.idArchivo
 INSERT INTO Estados (idEstado, Estado) VALUES ('1', 'Recibido')
 INSERT INTO Estados (idEstado, Estado) VALUES ('2', 'En proceso')
 INSERT INTO Estados (idEstado, Estado) VALUES ('3', 'Terminado')
+INSERT INTO Estados (idEstado, Estado) VALUES ('4', 'En espera de pago')
+INSERT INTO Estados (idEstado, Estado) VALUES ('5', 'Cancelado')
