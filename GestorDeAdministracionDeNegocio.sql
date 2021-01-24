@@ -209,12 +209,6 @@ Monto float not null
 )
 go
 
-create table AsientoPedido(
-idAsiento varchar(10) FOREIGN KEY REFERENCES Asientos(idAsiento) not null,
-idPedido int FOREIGN KEY REFERENCES Pedidos(idPedido) not null,
-primary key (idAsiento, idPedido)
-)
-go
 
 create table Inventario(
 idProducto varchar(10) primary key not null,
