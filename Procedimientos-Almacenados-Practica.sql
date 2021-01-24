@@ -361,9 +361,14 @@ COMMIT TRANSACTION SP_InformeMontoFechas
 ELSE
 ROLLBACK TRANSACTION SP_InformeMontoFechas
 
+INSERT INTO Estados (idEstado, Estado) VALUES ('1', 'Recibido')
+INSERT INTO Estados (idEstado, Estado) VALUES ('2', 'En proceso')
+INSERT INTO Estados (idEstado, Estado) VALUES ('3', 'Terminado')
+INSERT INTO Estados (idEstado, Estado) VALUES ('4', 'En espera de pago')
+INSERT INTO Estados (idEstado, Estado) VALUES ('5', 'Cancelado')
 
 
-/*CONTABILIAD*/
+/*CONTABILIAD por si acaso*/
 CREATE PROCEDURE SP_ListarContabilidad
 AS
 Begin TRANSACTION SP_ListarContabilidad
@@ -425,26 +430,3 @@ ROLLBACK TRANSACTION SP_ListarPatrimonio
 
 
 
-
-
-SELECT AsientosContables.fechaDeRegistro, AsientosContables.detalle, CuentaPatrimonio.MontoCapitalSocial, CuentaPatrimonio.MontoIngresoEnVentas,
-CuentaPatrimonio.CostoMercanciaVendida, CuentaPatrimonio.GastoEnSueldos, CuentaPatrimonio.GastoEnAlquileres, CuentaActivos.Efectivo,
-CuentaActivos.MontoCuentasPorCobrar, CuentaActivos.MontoInventario, CuentaActivos.MontoPorMobiliarioEquipo, CuentaActivos.TotalFinalActivos,
-CuentaPasivos.MontoCuentasPorPagar, CuentaPasivos.MontoDocumentosPorPagar, CuentaPasivos.TotalFinalPasivos FROM AsientosContables INNER JOIN 
-CuentaPatrimonio ON AsientosContables.idCuentaPatrimonio = CuentaPatrimonio.idCuentaPatrimonio INNER JOIN CuentaActivos ON AsientosContables.idCuentaActivos = CuentaActivos.idCuentaActivos
-INNER JOIN CuentaPasivos ON AsientosContables.idCuentaPasivos = CuentaPasivos.idCuentasPasivos
-
-SELECT count(*) FROM Usuarios
-
-
-
-SELECT Pedidos.idPedido, Pedidos.fechaDeEntrada, Pedidos.fechaDeEntrega, Pedidos.Cantidad, Pedidos.Facturacion,
-Pedidos.Abono, Pedidos.Total,
-Archivos.Nota, Archivos.Ruta FROM Pedidos INNER JOIN ArchivoPedido ON Pedidos.idPedido = ArchivoPedido.idPedido
-INNER JOIN Archivos ON Archivos.idArchivo = ArchivoPedido.idArchivo 
-
-INSERT INTO Estados (idEstado, Estado) VALUES ('1', 'Recibido')
-INSERT INTO Estados (idEstado, Estado) VALUES ('2', 'En proceso')
-INSERT INTO Estados (idEstado, Estado) VALUES ('3', 'Terminado')
-INSERT INTO Estados (idEstado, Estado) VALUES ('4', 'En espera de pago')
-INSERT INTO Estados (idEstado, Estado) VALUES ('5', 'Cancelado')
