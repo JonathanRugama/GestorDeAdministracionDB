@@ -368,65 +368,30 @@ INSERT INTO Estados (idEstado, Estado) VALUES ('4', 'En espera de pago')
 INSERT INTO Estados (idEstado, Estado) VALUES ('5', 'Cancelado')
 
 
-/*CONTABILIAD por si acaso*/
-CREATE PROCEDURE SP_ListarContabilidad
+CREATE PROCEDURE SP_SumarActivos
+@laPrimerFecha date,
+@laSegundaFecha date,
+@elTotal varchar(Max) output,
+@elMonto varchar(Max) output
 AS
-Begin TRANSACTION SP_ListarContabilidad
-SELECT AsientosContables.fechaDeRegistro, AsientosContables.detalle, CuentaPatrimonio.MontoCapitalSocial, CuentaPatrimonio.MontoIngresoEnVentas,
-CuentaPatrimonio.CostoMercanciaVendida, CuentaPatrimonio.GastoEnSueldos, CuentaPatrimonio.GastoEnAlquileres, CuentaActivos.Efectivo,
-CuentaActivos.MontoCuentasPorCobrar, CuentaActivos.MontoInventario, CuentaActivos.MontoPorMobiliarioEquipo, CuentaActivos.TotalFinalActivos,
-CuentaPasivos.MontoCuentasPorPagar, CuentaPasivos.MontoDocumentosPorPagar, CuentaPasivos.TotalFinalPasivos FROM AsientosContables INNER JOIN 
-CuentaPatrimonio ON AsientosContables.idCuentaPatrimonio = CuentaPatrimonio.idCuentaPatrimonio INNER JOIN CuentaActivos ON AsientosContables.idCuentaActivos = CuentaActivos.idCuentaActivos
-INNER JOIN CuentaPasivos ON AsientosContables.idCuentaPasivos = CuentaPasivos.idCuentasPasivos
+Begin TRANSACTION SP_SumarActivos
+SET @elTotal = (SELECT Count(LibroContable.Monto) From LibroContable WHERE LibroContable.TipoDeMovimiento = 'Activo' AND LibroContable.Fecha between @laPrimerFecha AND @laSegundaFecha)
+SET @elMonto = (SELECT Sum(LibroContable.Monto) From LibroContable WHERE LibroContable.TipoDeMovimiento = 'Activo' AND LibroContable.Fecha between @laPrimerFecha AND @laSegundaFecha)
 IF (@@ERROR =0)
-COMMIT TRANSACTION SP_ListarContabilidad
+COMMIT TRANSACTION SP_SumarActivos
 ELSE
-ROLLBACK TRANSACTION SP_ListarContabilidad
+ROLLBACK TRANSACTION SP_SumarActivos
 
-CREATE PROCEDURE SP_MostrarContabilidad
-@elIdAsiento int
+CREATE PROCEDURE SP_SumarPasivos
+@laPrimerFecha date,
+@laSegundaFecha date,
+@elTotal varchar(Max) output,
+@elMonto varchar(Max) output
 AS
-Begin TRANSACTION SP_MostrarContabilidad
-SELECT AsientosContables.fechaDeRegistro, AsientosContables.detalle, CuentaPatrimonio.MontoCapitalSocial, CuentaPatrimonio.MontoIngresoEnVentas,
-CuentaPatrimonio.CostoMercanciaVendida, CuentaPatrimonio.GastoEnSueldos, CuentaPatrimonio.GastoEnAlquileres, CuentaActivos.Efectivo,
-CuentaActivos.MontoCuentasPorCobrar, CuentaActivos.MontoInventario, CuentaActivos.MontoPorMobiliarioEquipo, CuentaActivos.TotalFinalActivos,
-CuentaPasivos.MontoCuentasPorPagar, CuentaPasivos.MontoDocumentosPorPagar, CuentaPasivos.TotalFinalPasivos FROM AsientosContables INNER JOIN 
-CuentaPatrimonio ON AsientosContables.idCuentaPatrimonio = CuentaPatrimonio.idCuentaPatrimonio INNER JOIN CuentaActivos ON AsientosContables.idCuentaActivos = CuentaActivos.idCuentaActivos
-INNER JOIN CuentaPasivos ON AsientosContables.idCuentaPasivos = CuentaPasivos.idCuentasPasivos WHERE AsientosContables.idAsientoContable = @elIdAsiento
+Begin TRANSACTION SP_SumarPasivos
+SET @elTotal = (SELECT Count(LibroContable.Monto) From LibroContable WHERE LibroContable.TipoDeMovimiento = 'Pasivo' AND LibroContable.Fecha between @laPrimerFecha AND @laSegundaFecha)
+SET @elMonto = (SELECT Sum(LibroContable.Monto) From LibroContable WHERE LibroContable.TipoDeMovimiento = 'Pasivo' AND LibroContable.Fecha between @laPrimerFecha AND @laSegundaFecha)
 IF (@@ERROR =0)
-COMMIT TRANSACTION SP_MostrarContabilidad
+COMMIT TRANSACTION SP_SumarPasivos
 ELSE
-ROLLBACK TRANSACTION SP_MostrarContabilidad
-
-CREATE PROCEDURE SP_ListarActivos
-AS
-Begin TRANSACTION SP_ListarActivos
-SELECT CuentaActivos.idCuentaActivos, CuentaActivos.Efectivo, CuentaActivos.MontoCuentasPorCobrar, CuentaActivos.MontoInventario, CuentaActivos.MontoPorMobiliarioEquipo, 
-CuentaActivos.TotalFinalActivos, AsientosContables.fechaDeRegistro, AsientosContables.detalle FROM CuentaActivos INNER JOIN AsientosContables ON CuentaActivos.idCuentaActivos = AsientosContables.idCuentaActivos
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_ListarActivos
-ELSE
-ROLLBACK TRANSACTION SP_ListarActivos
-
-CREATE PROCEDURE SP_ListarPasivos
-AS
-Begin TRANSACTION SP_ListarPasivos
-SELECT CuentaPasivos.idCuentasPasivos, CuentaPasivos.MontoCuentasPorPagar, CuentaPasivos.MontoDocumentosPorPagar, CuentaPasivos.TotalFinalPasivos, AsientosContables.fechaDeRegistro, AsientosContables.detalle
-FROM CuentaPasivos INNER JOIN AsientosContables ON CuentaPasivos.idCuentasPasivos = AsientosContables.idCuentaPasivos
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_ListarPasivos
-ELSE
-ROLLBACK TRANSACTION SP_ListarPasivos
-
-CREATE PROCEDURE SP_ListarPatrimonio
-AS
-Begin TRANSACTION SP_ListarPatrimonio
-SELECT CuentaPatrimonio.idCuentaPatrimonio, CuentaPatrimonio.CostoMercanciaVendida, CuentaPatrimonio.GastoEnAlquileres, CuentaPatrimonio.GastoEnSueldos, CuentaPatrimonio.MontoCapitalSocial, CuentaPatrimonio.MontoIngresoEnVentas, AsientosContables.fechaDeRegistro, AsientosContables.detalle
-FROM CuentaPatrimonio INNER JOIN AsientosContables ON CuentaPatrimonio.idCuentaPatrimonio = AsientosContables.idAsientoContable
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_ListarPatrimonio
-ELSE
-ROLLBACK TRANSACTION SP_ListarPatrimonio
-
-
-
+ROLLBACK TRANSACTION SP_SumarPasivos
