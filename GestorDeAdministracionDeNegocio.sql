@@ -408,20 +408,36 @@ SET ANSI_WARNINGS ON
 COMMIT
 BEGIN TRANSACTION
 GO
-COMMIT
-BEGIN TRANSACTION
-GO
-CREATE TABLE dbo.LibroContable
+CREATE TABLE dbo.Tmp_LibroContable
 	(
-	IdAsiento int NOT NULL,
+	IdAsiento int NOT NULL IDENTITY (1, 1),
 	Detalle nvarchar(100) NOT NULL,
 	TipoDeMovimiento nvarchar(30) NOT NULL,
 	Monto float(53) NOT NULL,
 	Fecha date NOT NULL,
-	Hora time(7) NOT NULL
+	Hora nvarchar(20) NOT NULL
 	)  ON [PRIMARY]
 GO
-ALTER TABLE dbo.LibroContable SET (LOCK_ESCALATION = TABLE)
+ALTER TABLE dbo.Tmp_LibroContable SET (LOCK_ESCALATION = TABLE)
+GO
+SET IDENTITY_INSERT dbo.Tmp_LibroContable ON
+GO
+IF EXISTS(SELECT * FROM dbo.LibroContable)
+	 EXEC('INSERT INTO dbo.Tmp_LibroContable (IdAsiento, Detalle, TipoDeMovimiento, Monto, Fecha, Hora)
+		SELECT IdAsiento, Detalle, TipoDeMovimiento, Monto, Fecha, Hora FROM dbo.LibroContable WITH (HOLDLOCK TABLOCKX)')
+GO
+SET IDENTITY_INSERT dbo.Tmp_LibroContable OFF
+GO
+DROP TABLE dbo.LibroContable
+GO
+EXECUTE sp_rename N'dbo.Tmp_LibroContable', N'LibroContable', 'OBJECT' 
+GO
+ALTER TABLE dbo.LibroContable ADD CONSTRAINT
+	PK_LibroContable PRIMARY KEY CLUSTERED 
+	(
+	IdAsiento
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
 GO
 COMMIT
-select Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'ALTER') as ALT_Per, Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'VIEW DEFINITION') as View_def_Per, Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'CONTROL') as Contr_Per
+select Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'ALTER') as ALT_Per, Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'VIEW DEFINITION') as View_def_Per, Has_Perms_By_Name(N'dbo.LibroContable', 'Object', 'CONTROL') as Contr_Per 
