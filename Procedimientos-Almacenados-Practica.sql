@@ -267,99 +267,6 @@ ELSE
 ROLLBACK TRANSACTION SP_ListarPedidosAsignadosB
 
 
-CREATE PROCEDURE SP_InformeTotalVentas
-@elTotal varchar(Max) output
-AS
-Begin TRANSACTION SP_InformeTotalVentas
-SET @elTotal = (SELECT Sum(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido WHERE EstadoPedido.idEstado = 3)
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_InformeTotalVentas
-ELSE
-ROLLBACK TRANSACTION SP_InformeTotalVentas
-
-CREATE PROCEDURE SP_InformePedidosEmpleado
-@elIdUsuario varchar(50),
-@elTotal varchar(max) output
-AS
-Begin TRANSACTION SP_InformePedidosEmpleado
-SET @elTotal = (SELECT Count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
-INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
-WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario)
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_InformePedidosEmpleado
-ELSE
-ROLLBACK TRANSACTION SP_InformePedidosEmpleado
-
-CREATE PROCEDURE SP_InformePedidosPendientes
-@elIdUsuario varchar(50),
-@elTotal varchar(max) output
-AS
-Begin TRANSACTION SP_InformePedidosPendientes
-SET @elTotal = (SELECT Count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
-INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
-WHERE EstadoPedido.idEstado = 2 AND EmpleadoAsignado.idUsuario = @elIdUsuario)
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_InformePedidosPendientes
-ELSE
-ROLLBACK TRANSACTION SP_InformePedidosPendientes
-
-CREATE PROCEDURE SP_InformeVentasDia
-@elIdUsuario varchar(50),
-@laFecha date,
-@elTotal varchar(max) output
-AS
-Begin TRANSACTION SP_InformeVentasDia
-SET @elTotal = (SELECT count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
-INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
-WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario AND CONVERT(DATE,GETDATE()) = @laFecha)
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_InformeVentasDia
-ELSE
-ROLLBACK TRANSACTION SP_InformeVentasDia
-
-CREATE PROCEDURE SP_InformeVentasFechas
-@elIdUsuario varchar(50),
-@laPrimerFecha date,
-@laSegundaFecha date,
-@elTotal varchar(max) output
-AS
-Begin TRANSACTION SP_InformeVentasFechas
-SET @elTotal = (SELECT count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
-INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
-WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario AND Pedidos.fechaDeEntrada between @laPrimerFecha AND @laSegundaFecha)
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_InformeVentasFechas
-ELSE
-ROLLBACK TRANSACTION SP_InformeVentasFechas
-
-CREATE PROCEDURE SP_InformeMontosDia
-@elIdUsuario varchar(50),
-@laFecha date,
-@elTotal varchar(max) output
-AS
-Begin TRANSACTION SP_InformeMontosDia
-SET @elTotal = (SELECT sum(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
-INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
-WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario AND CONVERT(DATE,GETDATE()) = @laFecha)
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_InformeMontosDia
-ELSE
-ROLLBACK TRANSACTION SP_InformeMontosDia
-
-CREATE PROCEDURE SP_InformeMontoFechas
-@elIdUsuario varchar(50),
-@laPrimerFecha date,
-@laSegundaFecha date,
-@elTotal varchar(max) output
-AS
-Begin TRANSACTION SP_InformeMontoFechas
-SET @elTotal = (SELECT sum(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
-INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
-WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario AND Pedidos.fechaDeEntrada between @laPrimerFecha AND @laSegundaFecha)
-IF (@@ERROR =0)
-COMMIT TRANSACTION SP_InformeMontoFechas
-ELSE
-ROLLBACK TRANSACTION SP_InformeMontoFechas
 
 INSERT INTO Estados (idEstado, Estado) VALUES ('1', 'Recibido')
 INSERT INTO Estados (idEstado, Estado) VALUES ('2', 'En proceso')
@@ -395,3 +302,83 @@ IF (@@ERROR =0)
 COMMIT TRANSACTION SP_SumarPasivos
 ELSE
 ROLLBACK TRANSACTION SP_SumarPasivos
+
+
+
+/*INFORMES*/
+
+
+CREATE PROCEDURE SP_InformeTotalVentas
+@elTotal varchar(Max) output,
+@laCantidad varchar(max) output
+AS
+Begin TRANSACTION SP_InformeTotalVentas
+SET @elTotal = (SELECT Sum(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido WHERE EstadoPedido.idEstado = 3)
+SET @laCantidad = (SELECT count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido WHERE EstadoPedido.idEstado = 3)
+IF (@@ERROR =0)
+COMMIT TRANSACTION SP_InformeTotalVentas
+ELSE
+ROLLBACK TRANSACTION SP_InformeTotalVentas
+
+CREATE PROCEDURE SP_InformePedidosEmpleado
+@elIdUsuario varchar(50),
+@elTotal varchar(max) output
+AS
+Begin TRANSACTION SP_InformePedidosEmpleado
+SET @elTotal = (SELECT Count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
+INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
+WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario)
+IF (@@ERROR =0)
+COMMIT TRANSACTION SP_InformePedidosEmpleado
+ELSE
+ROLLBACK TRANSACTION SP_InformePedidosEmpleado
+
+CREATE PROCEDURE SP_InformePedidosPendientes
+@elIdUsuario varchar(50),
+@elTotal varchar(max) output
+AS
+Begin TRANSACTION SP_InformePedidosPendientes
+SET @elTotal = (SELECT Count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
+INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
+WHERE EstadoPedido.idEstado = 2 AND EmpleadoAsignado.idUsuario = @elIdUsuario)
+IF (@@ERROR =0)
+COMMIT TRANSACTION SP_InformePedidosPendientes
+ELSE
+ROLLBACK TRANSACTION SP_InformePedidosPendientes
+
+CREATE PROCEDURE SP_InformeVentasDia
+@elIdUsuario varchar(50),
+@laFecha date,
+@elTotal varchar(max) output,
+@laCantidad varchar(max) output
+AS
+Begin TRANSACTION SP_InformeVentasDia
+SET @laCantidad = (SELECT sum(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
+INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
+WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario AND CONVERT(DATE,GETDATE()) = @laFecha)
+SET @elTotal = (SELECT count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
+INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
+WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario AND CONVERT(DATE,GETDATE()) = @laFecha)
+IF (@@ERROR =0)
+COMMIT TRANSACTION SP_InformeVentasDia
+ELSE
+ROLLBACK TRANSACTION SP_InformeVentasDia
+
+CREATE PROCEDURE SP_InformeVentasFechas
+@elIdUsuario varchar(50),
+@laPrimerFecha date,
+@laSegundaFecha date,
+@elTotal varchar(max) output,
+@laCantidad varchar(max) output
+AS
+Begin TRANSACTION SP_InformeVentasFechas
+SET @laCantidad = (SELECT count(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
+INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
+WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario AND Pedidos.fechaDeEntrada between @laPrimerFecha AND @laSegundaFecha)
+SET @elTotal = (SELECT sum(Pedidos.Total) From Pedidos INNER JOIN EstadoPedido ON EstadoPedido.idPedido = Pedidos.idPedido 
+INNER JOIN EmpleadoAsignado ON EmpleadoAsignado.idPedido = Pedidos.idPedido
+WHERE EstadoPedido.idEstado = 3 AND EmpleadoAsignado.idUsuario = @elIdUsuario AND Pedidos.fechaDeEntrada between @laPrimerFecha AND @laSegundaFecha)
+IF (@@ERROR =0)
+COMMIT TRANSACTION SP_InformeVentasFechas
+ELSE
+ROLLBACK TRANSACTION SP_InformeVentasFechas
